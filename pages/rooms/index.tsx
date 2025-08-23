@@ -16,7 +16,10 @@ export default function RoomsPage() {
   });
 
   useEffect(() => {
-    if (status !== "authenticated") return;
+    if (status !== "authenticated") {
+      setState((s) => ({ ...s, loading: false }));
+      return;
+    }
     (async () => {
       const res = await fetch("/api/rooms");
       const data = await res.json();
@@ -31,11 +34,12 @@ export default function RoomsPage() {
   }, [status]);
 
   if (status === "loading") return <div className="p-6">Loading…</div>;
-  if (status !== "authenticated")
+
+  if (status !== "authenticated") {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-semibold">Rooms</h1>
-        <p className="text-white/70">Sign in to view your rooms.</p>
+        <p className="mt-2 text-white/70">Please sign in to see your rooms.</p>
         <button
           onClick={() => signIn("google")}
           className="mt-4 rounded-md bg-indigo-500 px-4 py-2 font-medium text-slate-900 hover:bg-indigo-400 transition"
@@ -44,6 +48,7 @@ export default function RoomsPage() {
         </button>
       </div>
     );
+  }
 
   return (
     <div className="p-6">

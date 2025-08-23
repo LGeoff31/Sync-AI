@@ -23,7 +23,7 @@ export default function Sidebar() {
   const { status, data } = useSession();
   const user = data?.user;
   return (
-    <aside className="hidden md:flex md:w-72 md:flex-col md:border-r md:border-white/10 md:bg-white/5">
+    <div className="hidden md:flex md:w-72 md:flex-col md:border-r md:border-white/10 md:bg-white/5 h-screen">
       <div className="px-4 py-5 border-b border-white/10">
         <div className="flex items-center gap-3">
           {user?.image ? (
@@ -75,6 +75,6 @@ export default function Sidebar() {
           </button>
         </div>
       )}
-    </aside>
+    </div>
   );
 }
