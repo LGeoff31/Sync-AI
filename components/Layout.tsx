@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-// removed header auth buttons; handled in Sidebar
 import Sidebar from "@/components/Sidebar";
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -10,17 +9,13 @@ export default function Layout({ children }: { children: ReactNode }) {
   const showSidebar =
     router.pathname.startsWith("/rooms") ||
     router.pathname.startsWith("/profile");
-  console.log(router.pathname);
   return (
     <div className="flex flex-col">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(60rem_60rem_at_top_right,rgba(99,102,241,0.15),transparent_60%),radial-gradient(40rem_40rem_at_-10%_120%,rgba(168,85,247,0.12),transparent_60%)]" />
-      <Link
-        href="/"
-        className="absolute top-4 left-4 z-10 pointer-events-auto flex-row flex items-center gap-2"
-      >
+      <div className="absolute top-4 left-4 z-10 pointer-events-auto flex-row flex items-center gap-2">
         <img src="/logo.svg" alt="syncAI" className="h-10 w-10" />
         <span className="text-white text-2xl font-bold">SyncAI</span>
-      </Link>
+      </div>
 
       <div className="relative z-10 flex flex-1">
         {showSidebar && <Sidebar />}

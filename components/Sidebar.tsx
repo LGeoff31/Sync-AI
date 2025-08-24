@@ -24,16 +24,6 @@ export default function Sidebar() {
   const user = data?.user;
   return (
     <div className="hidden md:flex md:w-72 md:flex-col md:border-r md:border-white/10 md:bg-white/5 h-screen">
-      {/* <div className="px-4 py-8 border-b border-white/10">
-        {status !== "authenticated" && (
-          <button
-            onClick={() => signIn("google")}
-            className="mt-3 w-full rounded-md bg-indigo-500 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-indigo-400 transition"
-          >
-            Sign in
-          </button>
-        )}
-      </div> */}
       <div className="px-4 py-8 border-b border-white/10"></div>
 
       <nav className="flex-1 px-3 py-4">
@@ -83,7 +73,7 @@ export default function Sidebar() {
               <summary className="list-none cursor-pointer rounded-md px-2 py-1 text-white/70 hover:text-white transition">
                 ⋯
               </summary>
-              <div className="absolute right-0 mt-2 w-36 rounded-md border border-white/10 bg-slate-900/90 p-1 shadow-lg backdrop-blur">
+              <div className="absolute right-0 bottom-full mb-2 z-20 w-36 rounded-md border border-white/10 bg-slate-900/90 p-1 shadow-lg backdrop-blur">
                 <button
                   onClick={() => signOut()}
                   className="w-full rounded px-2 py-1.5 text-left text-sm text-white/90 hover:bg-white/10"

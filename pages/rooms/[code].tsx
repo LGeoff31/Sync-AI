@@ -33,6 +33,7 @@ export default function RoomPage() {
     loading: boolean;
     name?: string;
     error?: string;
+    members?: { user_email: string; user_name: string; joined_at: string }[];
   }>({ loading: true });
 
   useEffect(() => {
@@ -40,8 +41,22 @@ export default function RoomPage() {
     (async () => {
       const res = await fetch(`/api/rooms/${code}`);
       const data = await res.json();
-      if (res.ok) setState({ loading: false, name: data.room.name });
-      else setState({ loading: false, error: data.error || "Room not found" });
+      if (!res.ok) {
+        setState({ loading: false, error: data.error || "Room not found" });
+        return;
+      }
+      // attempt to join as member (no-op if already joined or unauthenticated)
+      try {
+        await fetch(`/api/rooms/${code}/members`, { method: "POST" });
+      } catch {}
+      // fetch members after join
+      const resM = await fetch(`/api/rooms/${code}/members`);
+      const dataM = await resM.json();
+      setState({
+        loading: false,
+        name: data.room.name,
+        members: dataM.members || [],
+      });
     })();
   }, [code]);
 
@@ -71,6 +86,26 @@ export default function RoomPage() {
             </p>
             <div className="mt-4">
               <InviteLink code={String(code)} />
+            </div>
+            <div className="mt-6">
+              <h2 className="text-lg font-medium">Members</h2>
+              {state.members && state.members.length > 0 ? (
+                <ul className="mt-3 divide-y divide-white/10 rounded-lg border border-white/10 bg-white/5">
+                  {state.members.map((m) => (
+                    <li
+                      key={m.user_email}
+                      className="flex items-center justify-between px-4 py-2"
+                    >
+                      <div className="font-medium">{m.user_name}</div>
+                      <div className="text-xs text-white/60">
+                        {m.user_email}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-sm text-white/70">No members yet.</p>
+              )}
             </div>
           </div>
         )}

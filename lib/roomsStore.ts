@@ -33,5 +33,6 @@ export function createRoom(name: string): Room {
 
 export function getRoom(code: string): Room | undefined {
   const store = getGlobalStore();
+  console.log(store);
   return store[code.toUpperCase()];
 }
