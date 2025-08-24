@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { signOut, useSession, signIn } from "next-auth/react";
+import { useEffect, useRef, useState } from "react";
+import type React from "react";
 
 function NavItem({ href, label }: { href: string; label: string }) {
   const router = useRouter();
@@ -22,8 +24,56 @@ function NavItem({ href, label }: { href: string; label: string }) {
 export default function Sidebar() {
   const { status, data } = useSession();
   const user = data?.user;
+  const [sidebarWidth, setSidebarWidth] = useState<number>(288);
+  const startXRef = useRef(0 as number);
+  const startWidthRef = useRef(288 as number);
+
+  useEffect(() => {
+    try {
+      const saved =
+        typeof window !== "undefined"
+          ? window.localStorage.getItem("__SIDEBAR_WIDTH__")
+          : null;
+      if (saved) {
+        const n = Number(saved);
+        if (!Number.isNaN(n)) setSidebarWidth(Math.min(480, Math.max(200, n)));
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("__SIDEBAR_WIDTH__", String(sidebarWidth));
+      }
+    } catch {}
+  }, [sidebarWidth]);
+
+  const beginResize = (e: React.MouseEvent<HTMLDivElement>) => {
+    startXRef.current = e.clientX;
+    startWidthRef.current = sidebarWidth;
+
+    const onMouseMove = (ev: MouseEvent) => {
+      const delta = ev.clientX - startXRef.current;
+      const next = Math.min(480, Math.max(200, startWidthRef.current + delta));
+      setSidebarWidth(next);
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    };
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  };
   return (
-    <div className="hidden md:flex md:w-72 md:flex-col md:border-r md:border-white/10 md:bg-white/5 h-screen">
+    <div
+      className="hidden md:flex md:flex-col md:border-r md:border-white/10 md:bg-white/5 h-screen relative"
+      style={{ width: sidebarWidth }}
+    >
       <div className="px-4 py-8 border-b border-white/10"></div>
 
       <nav className="flex-1 px-3 py-4">
@@ -85,6 +135,12 @@ export default function Sidebar() {
           </div>
         </div>
       )}
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        onMouseDown={beginResize}
+        className="absolute top-0 right-0 z-10 h-full w-1 cursor-col-resize bg-transparent hover:bg-white/10"
+      />
     </div>
   );
 }
