@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/router";
+import { FaPlus } from "react-icons/fa";
 
 type Room = { code: string; name: string; created_at: string };
 
@@ -50,7 +51,7 @@ export default function RoomsPage() {
         <div>
           <h1 className="text-2xl font-semibold">Rooms</h1>
           <p className="mt-2 text-white/70">
-            Please sign in to see your rooms.
+            Please sign in to see your rooms and join rooms.
           </p>
           <button
             onClick={() => signIn("google")}
@@ -59,40 +60,6 @@ export default function RoomsPage() {
             Sign in with Google
           </button>
         </div>
-
-        <section className="rounded-xl border border-white/10 bg-white/5 p-4 shadow-sm">
-          <h2 className="text-lg font-medium">Join a room</h2>
-          <p className="mt-1 text-sm text-white/70">
-            Have a code? Enter it below.
-          </p>
-          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="flex-1 h-12 rounded-md bg-slate-900/60 ring-1 ring-white/10 px-2 flex items-center gap-2">
-              <input
-                value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                onKeyDown={(e) => e.key === "Enter" && onJoin()}
-                placeholder="ENTER CODE"
-                className="bg-transparent outline-none uppercase tracking-widest px-2 w-full h-full placeholder:text-white/30 text-white"
-              />
-            </div>
-            <button
-              onClick={onJoin}
-              disabled={!isValid}
-              className={`h-12 whitespace-nowrap rounded-md px-5 font-medium transition ${
-                isValid
-                  ? "bg-purple-400 text-slate-900 hover:bg-purple-300"
-                  : "bg-slate-700 text-slate-400 cursor-not-allowed"
-              }`}
-            >
-              Join
-            </button>
-          </div>
-          {!isValid && joinCode.length > 0 && (
-            <p className="mt-2 text-xs text-white/60">
-              Code must be 6–8 letters/numbers
-            </p>
-          )}
-        </section>
       </div>
     );
   }
@@ -103,9 +70,10 @@ export default function RoomsPage() {
         <h1 className="text-2xl font-semibold">Your rooms</h1>
         <Link
           href="/rooms/new"
-          className="rounded-md bg-indigo-500 px-4 py-2 font-medium text-slate-900 hover:bg-indigo-400 transition"
+          className="rounded-md bg-indigo-500 px-4 py-2 font-medium text-slate-900 hover:bg-indigo-400 transition inline-flex items-center gap-2"
         >
-          New room
+          <FaPlus className="h-4 w-4" />
+          <span>New room</span>
         </Link>
       </div>
 

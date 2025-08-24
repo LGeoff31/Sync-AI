@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import copy from "copy-to-clipboard";
+import { FaRegClipboard, FaClipboardCheck } from "react-icons/fa";
 
 function InviteLink({ code }: { code: string }) {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -18,9 +19,11 @@ function InviteLink({ code }: { code: string }) {
           setCopied(true);
           setTimeout(() => setCopied(false), 1200);
         }}
-        className="rounded-md bg-indigo-500 px-3 py-2 font-medium text-slate-900 hover:bg-indigo-400 transition"
+        className="rounded-md bg-indigo-500 px-3 py-2 font-medium text-slate-900 hover:bg-indigo-400 transition cursor-pointer"
+        aria-label={copied ? "Copied" : "Copy to clipboard"}
+        title={copied ? "Copied" : "Copy to clipboard"}
       >
-        {copied ? "Copied!" : "Copy"}
+        {copied ? <FaClipboardCheck /> : <FaRegClipboard />}
       </button>
     </div>
   );
@@ -39,23 +42,21 @@ export default function RoomPage() {
   useEffect(() => {
     if (!code) return;
     (async () => {
-      const res = await fetch(`/api/rooms/${code}`);
-      const data = await res.json();
-      if (!res.ok) {
-        setState({ loading: false, error: data.error || "Room not found" });
-        return;
-      }
-      // attempt to join as member (no-op if already joined or unauthenticated)
-      try {
-        await fetch(`/api/rooms/${code}/members`, { method: "POST" });
-      } catch {}
-      // fetch members after join
-      const resM = await fetch(`/api/rooms/${code}/members`);
-      const dataM = await resM.json();
+      const [resM, resRoom] = await Promise.all([
+        fetch(`/api/rooms/${code}/members`),
+        fetch(`/api/rooms/${code}`),
+      ]);
+      const dataM = await resM.json().catch(() => ({ members: [] }));
+      const roomPayload = await resRoom.json().catch(() => ({}));
+      const roomName =
+        resRoom.ok && roomPayload?.room?.name
+          ? roomPayload.room.name
+          : undefined;
+
       setState({
         loading: false,
-        name: data.room.name,
-        members: dataM.members || [],
+        name: roomName,
+        members: Array.isArray(dataM?.members) ? dataM.members : [],
       });
     })();
   }, [code]);
@@ -63,24 +64,18 @@ export default function RoomPage() {
   return (
     <div className="px-6 py-12">
       <div className="mx-auto max-w-2xl space-y-6">
-        <div className="flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-sm text-white/70 hover:text-white underline-offset-4 hover:underline"
-          >
-            Home
-          </Link>
-          <code className="rounded bg-slate-900/60 px-2 py-1 text-white ring-1 ring-white/10">
-            {code}
-          </code>
-        </div>
         {state.loading && <p className="text-white/80">Loading...</p>}
         {state.error && <p className="text-red-400">{state.error}</p>}
         {!state.loading && !state.error && (
           <div className="rounded-xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur">
-            <h1 className="text-2xl font-semibold">
-              {state.name || "Untitled room"}
-            </h1>
+            <div className="flex items-center gap-3 justify-between">
+              <h1 className="text-2xl font-semibold">
+                {state.name || "Untitled room"}
+              </h1>
+              <code className="rounded bg-slate-900/60 px-2 py-1 text-sm text-white/70 ring-1 ring-white/10">
+                {code}
+              </code>
+            </div>
             <p className="mt-1 text-sm text-white/70">
               Share this link with friends to join:
             </p>

@@ -16,6 +16,7 @@ export default async function handler(
       .select("user_email,user_name,joined_at")
       .eq("room_code", code.toUpperCase())
       .order("joined_at", { ascending: true });
+    console.log("data", data, "error", error);
     if (error) return res.status(500).json({ error: error.message });
     return res.status(200).json({ members: data || [] });
   }

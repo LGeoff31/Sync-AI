@@ -20,7 +20,9 @@ export default async function handler(
       .order("created_at", { ascending: false });
     if (error) return res.status(500).json({ error: error.message });
     return res.status(200).json({ rooms: data || [] });
-  } else if (req.method === "POST") {
+  }
+
+  if (req.method === "POST") {
     const session = await getServerSession(req, res, authOptions);
     if (!session?.user?.email)
       return res.status(401).json({ error: "Not authenticated" });
