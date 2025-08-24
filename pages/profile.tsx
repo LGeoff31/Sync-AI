@@ -20,12 +20,35 @@ export default function ProfilePage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-semibold">Profile</h1>
-      <div className="mt-4 space-y-2">
-        <div className="text-white/80">
-          Name: {data.user?.name || "Anonymous"}
-        </div>
-        <div className="text-white/80">Email: {data.user?.email || "N/A"}</div>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Profile</h1>
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <section className="rounded-lg border border-white/10 bg-white/5 p-4 lg:col-span-2">
+          <h2 className="text-lg font-medium">About you</h2>
+          <p className="mt-1 text-sm text-white/70">
+            Share a short description so friends know it’s you.
+          </p>
+          <textarea
+            rows={6}
+            placeholder="Write a brief description..."
+            className="mt-4 w-full resize-none rounded-md bg-slate-900/60 px-3 py-2 text-white placeholder:text-white/30 ring-1 ring-white/10 outline-none focus:ring-indigo-400/40"
+          />
+          <div className="mt-3 flex justify-end">
+            <button className="rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-indigo-400 transition">
+              Save
+            </button>
+          </div>
+        </section>
+
+        <aside className="rounded-lg border border-white/10 bg-white/5 p-4">
+          <h2 className="text-lg font-medium">Your info</h2>
+          <div className="mt-3 space-y-2 text-white/80">
+            <div>Name: {data.user?.name || "Anonymous"}</div>
+            <div>Email: {data.user?.email || "N/A"}</div>
+          </div>
+        </aside>
       </div>
     </div>
   );
