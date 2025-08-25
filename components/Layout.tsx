@@ -21,7 +21,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         {showSidebar && <Sidebar />}
         <main className="flex-1">{children}</main>
       </div>
-      <footer className="text-center text-xs text-white/50 absolute bottom-4 left-1/2 -translate-x-1/2">
+      <footer className="text-center text-xs text-white/50 absolute bottom-0 left-1/2 -translate-x-1/2">
         © {new Date().getFullYear()} SyncAI
       </footer>
     </div>

@@ -13,13 +13,39 @@ export default async function handler(
     if (!session?.user?.email)
       return res.status(401).json({ error: "Not authenticated" });
     const email = session.user.email;
-    const { data, error } = await supabase
+
+    const { data: createdRows, error: createdErr } = await supabase
+      .from("room")
+      .select("code")
+      .eq("created_by", email);
+    if (createdErr) return res.status(500).json({ error: createdErr.message });
+
+    const { data: memberRows, error: memberErr } = await supabase
+      .from("room_member")
+      .select("room_code")
+      .eq("user_email", email);
+    if (memberErr) return res.status(500).json({ error: memberErr.message });
+
+    const codeSet = new Set<string>();
+    (createdRows || []).forEach((r) =>
+      codeSet.add(String(r.code).toUpperCase())
+    );
+    (memberRows || []).forEach((m) =>
+      codeSet.add(String(m.room_code).toUpperCase())
+    );
+
+    const codes = Array.from(codeSet);
+    if (codes.length === 0) {
+      return res.status(200).json({ rooms: [] });
+    }
+
+    const { data: rooms, error } = await supabase
       .from("room")
       .select("code,name,created_at,created_by")
-      .eq("created_by", email)
+      .in("code", codes)
       .order("created_at", { ascending: false });
     if (error) return res.status(500).json({ error: error.message });
-    return res.status(200).json({ rooms: data || [] });
+    return res.status(200).json({ rooms: rooms || [] });
   }
 
   if (req.method === "POST") {

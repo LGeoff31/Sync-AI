@@ -125,7 +125,7 @@ export default function Sidebar() {
               </summary>
               <div className="absolute right-0 bottom-full mb-2 z-20 w-36 rounded-md border border-white/10 bg-slate-900/90 p-1 shadow-lg backdrop-blur">
                 <button
-                  onClick={() => signOut()}
+                  onClick={() => signOut({ callbackUrl: "/" })}
                   className="w-full rounded px-2 py-1.5 text-left text-sm text-white/90 hover:bg-white/10"
                 >
                   Sign out

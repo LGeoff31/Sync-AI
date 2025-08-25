@@ -10,6 +10,106 @@ body {
   font-family: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI,
     Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial,
     "Apple Color Emoji", "Segoe UI Emoji";
-  background-color: rgb(2 6 23); /* slate-950 */
+  background-color: rgb(2 6 23);
   color: white;
+}
+
+.rbc-calendar,
+.rbc-time-view,
+.rbc-time-content,
+.rbc-time-header,
+.rbc-time-gutter,
+.rbc-day-slot,
+.rbc-time-slot,
+.rbc-timeslot-group,
+.rbc-row,
+.rbc-month-view {
+  background: transparent;
+}
+
+.fc {
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: transparent;
+  --fc-border-color: rgba(255, 255, 255, 0.1);
+  --fc-today-bg-color: rgba(255, 255, 255, 0.06);
+  --fc-now-indicator-color: #ef4444;
+  --fc-event-text-color: #e5e7eb;
+}
+.fc .fc-toolbar.fc-header-toolbar {
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+}
+.fc .fc-toolbar-title {
+  color: #fff;
+  font-weight: 600;
+}
+.fc .fc-button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e5e7eb;
+}
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.fc .fc-timegrid-slot {
+  background: transparent;
+}
+.fc .fc-timegrid-axis-cushion,
+.fc .fc-col-header-cell-cushion {
+  color: rgba(255, 255, 255, 0.7);
+}
+.fc .fc-timegrid-now-indicator-line {
+  border-color: #ef4444;
+}
+
+.fc .fc-day-today,
+.fc .fc-timegrid-col.fc-day-today {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.rbc-toolbar {
+  display: none;
+}
+
+.rbc-header,
+.rbc-time-header,
+.rbc-time-content,
+.rbc-timeslot-group,
+.rbc-day-bg,
+.rbc-time-gutter,
+.rbc-month-row,
+.rbc-month-view,
+.rbc-row-bg {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.rbc-today {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.rbc-time-gutter .rbc-time-slot {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.rbc-event {
+  background: transparent;
+  color: #e5e7eb;
+  padding: 4px 8px;
+  border-radius: 10px;
+}
+
+.rbc-event-content,
+.rbc-event-label {
+  color: inherit;
+}
+
+.rbc-current-time-indicator {
+  background-color: #ef4444;
 }

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import Link from "next/link";
 import copy from "copy-to-clipboard";
 import { FaRegClipboard, FaClipboardCheck } from "react-icons/fa";
+import RoomCalendar, { type RoomCalendarData } from "@/components/RoomCalendar";
+import { useSession, signIn } from "next-auth/react";
 
 function InviteLink({ code }: { code: string }) {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -32,76 +33,118 @@ function InviteLink({ code }: { code: string }) {
 export default function RoomPage() {
   const router = useRouter();
   const { code } = router.query as { code?: string };
+  const { status } = useSession();
   const [state, setState] = useState<{
     loading: boolean;
     name?: string;
     error?: string;
     members?: { user_email: string; user_name: string; joined_at: string }[];
+    free?: { start: string; end: string }[];
+    calendar?: RoomCalendarData;
   }>({ loading: true });
 
   useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/");
+    }
+  }, [status, router]);
+
+  useEffect(() => {
     if (!code) return;
-    (async () => {
-      const [resM, resRoom] = await Promise.all([
+    if (status !== "authenticated") return;
+    const fetchAll = async () => {
+      try {
+        await fetch(`/api/rooms/${code}/members`, { method: "POST" });
+      } catch {}
+
+      const [resM, resRoom, resAvail] = await Promise.all([
         fetch(`/api/rooms/${code}/members`),
         fetch(`/api/rooms/${code}`),
+        fetch(`/api/rooms/${code}/availability`),
       ]);
       const dataM = await resM.json().catch(() => ({ members: [] }));
       const roomPayload = await resRoom.json().catch(() => ({}));
+      console.log("resRoom", resRoom);
       const roomName =
         resRoom.ok && roomPayload?.room?.name
           ? roomPayload.room.name
           : undefined;
 
-      setState({
+      const availPayload = await resAvail
+        .json()
+        .catch(() => ({ free: [], range: undefined }));
+
+      setState((s) => ({
         loading: false,
         name: roomName,
-        members: Array.isArray(dataM?.members) ? dataM.members : [],
-      });
-    })();
-  }, [code]);
+        members: Array.isArray(dataM?.members)
+          ? dataM.members
+          : s.members || [],
+        free: Array.isArray((availPayload as any)?.free)
+          ? (availPayload as any).free
+          : s.free || [],
+        calendar: {
+          members: [],
+          commonFree: Array.isArray((availPayload as any)?.free)
+            ? (availPayload as any).free
+            : [],
+          range: (availPayload as any)?.range,
+        },
+      }));
+    };
+
+    fetchAll();
+  }, [code, status]);
+
+  if (status === "loading")
+    return <div className="px-6 py-12 text-white/80">Checking session...</div>;
+  if (status !== "authenticated") return null;
 
   return (
     <div className="px-6 py-12">
-      <div className="mx-auto max-w-2xl space-y-6">
+      <div className="mx-auto max-w-6xl">
         {state.loading && <p className="text-white/80">Loading...</p>}
         {state.error && <p className="text-red-400">{state.error}</p>}
         {!state.loading && !state.error && (
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur">
-            <div className="flex items-center gap-3 justify-between">
-              <h1 className="text-2xl font-semibold">
-                {state.name || "Untitled room"}
-              </h1>
-              <code className="rounded bg-slate-900/60 px-2 py-1 text-sm text-white/70 ring-1 ring-white/10">
-                {code}
-              </code>
-            </div>
-            <p className="mt-1 text-sm text-white/70">
-              Share this link with friends to join:
-            </p>
-            <div className="mt-4">
-              <InviteLink code={String(code)} />
-            </div>
-            <div className="mt-6">
-              <h2 className="text-lg font-medium">Members</h2>
-              {state.members && state.members.length > 0 ? (
-                <ul className="mt-3 divide-y divide-white/10 rounded-lg border border-white/10 bg-white/5">
-                  {state.members.map((m) => (
-                    <li
-                      key={m.user_email}
-                      className="flex items-center justify-between px-4 py-2"
-                    >
-                      <div className="font-medium">{m.user_name}</div>
-                      <div className="text-xs text-white/60">
-                        {m.user_email}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-2 text-sm text-white/70">No members yet.</p>
-              )}
-            </div>
+          <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+            <RoomCalendar data={state.calendar} />
+
+            <aside className="rounded-xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur h-max">
+              <div className="flex items-center gap-3 justify-between">
+                <h1 className="text-2xl font-semibold">
+                  {state.name || "Untitled room"}
+                </h1>
+                <code className="rounded bg-slate-900/60 px-2 py-1 text-sm text-white/70 ring-1 ring-white/10">
+                  {code}
+                </code>
+              </div>
+              <p className="mt-1 text-sm text-white/70">
+                Share this link with friends to join:
+              </p>
+              <div className="mt-4">
+                <InviteLink code={String(code)} />
+              </div>
+              <div className="mt-6">
+                <h2 className="text-lg font-medium">Members</h2>
+                {state.members && state.members.length > 0 ? (
+                  <ul className="mt-3 divide-y divide-white/10 rounded-lg border border-white/10 bg-white/5">
+                    {state.members.map((m) => (
+                      <li
+                        key={m.user_email}
+                        className="flex items-center justify-between px-4 py-2"
+                      >
+                        <div className="font-medium">{m.user_name}</div>
+                        <div className="text-xs text-white/60">
+                          {m.user_email}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-sm text-white/70">No members yet.</p>
+                )}
+              </div>
+            </aside>
           </div>
         )}
       </div>
