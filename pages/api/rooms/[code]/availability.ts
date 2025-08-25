@@ -25,7 +25,7 @@ export default async function handler(
   const now = new Date();
   const timeMin = new Date(now).toISOString();
   const timeMax = new Date(
-    now.getTime() + 7 * 24 * 60 * 60 * 1000
+    now.getTime() + 30 * 24 * 60 * 60 * 1000
   ).toISOString();
 
   const { data: members, error: memErr } = await supabase

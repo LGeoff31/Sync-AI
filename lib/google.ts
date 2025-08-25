@@ -109,6 +109,41 @@ export async function fetchPrimaryBusy(
   return (primary.busy || []).map((b) => ({ start: b.start, end: b.end }));
 }
 
+export async function createPrimaryEvent(
+  accessToken: string,
+  event: {
+    summary: string;
+    description?: string;
+    start: { dateTime: string; timeZone?: string };
+    end: { dateTime: string; timeZone?: string };
+    attendees?: { email: string }[];
+  }
+): Promise<{ id: string | null; status?: number; error?: unknown }> {
+  const url =
+    "https://www.googleapis.com/calendar/v3/calendars/primary/events?sendUpdates=all";
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(event),
+  });
+  if (!resp.ok) {
+    let details: unknown = undefined;
+    try {
+      details = await resp.json();
+    } catch {
+      try {
+        details = await resp.text();
+      } catch {}
+    }
+    return { id: null, status: resp.status, error: details };
+  }
+  const data = (await resp.json()) as { id?: string };
+  return { id: data?.id || null };
+}
+
 type Interval = { s: number; e: number };
 
 function mergeIntervals(intervals: Interval[]): Interval[] {

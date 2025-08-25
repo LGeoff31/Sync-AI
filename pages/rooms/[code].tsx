@@ -152,6 +152,27 @@ export default function RoomPage() {
                   <p className="mt-2 text-sm text-white/70">No members yet.</p>
                 )}
               </div>
+
+              <div className="mt-6">
+                <button
+                  onClick={async () => {
+                    if (!state.free || state.free.length === 0)
+                      return alert("No free window available");
+                    const best = state.free[0];
+                    const res = await fetch(`/api/rooms/${code}/schedule`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ window: best }),
+                    });
+                    const data = await res.json();
+                    if (res.ok) alert(`Scheduled: ${data.title}`);
+                    else alert(data.error || "Failed to schedule");
+                  }}
+                  className="w-full rounded-md bg-emerald-500 px-4 py-2 font-medium text-slate-900 hover:bg-emerald-400 transition"
+                >
+                  Auto-schedule with AI
+                </button>
+              </div>
             </aside>
           </div>
         )}
