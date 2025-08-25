@@ -1,27 +1,28 @@
 ## SyncAI
 
-A collaborative scheduling app: create a room, invite friends, see everyone’s overlapping free time, and let AI propose an activity and book it on everyone’s calendar. Optionally tailor suggestions using each member’s profile and pick a venue near the group’s midpoint.
+SyncAI solves two simple problems; when are friends free and what activity should we do. 
+
+
+Simply create a room, invite your friends, see everyone’s overlapping free time, and let AI pick the activity + book it on everyone’s calendar. Optionally tailor activity ideas through each member’s profile. The activity we pick will be close to the overall location of the group.
 
 ### Features
 - Rooms
-  - Create/join rooms by code (e.g., WVYSS8)
-  - Member list with join-on-visit
+  - Create/join rooms by code (i.e WVYSS8)
+  - View the rooms member list
 - Availability
-  - Google Calendar FreeBusy for each member (read-only)
+  - Visually displays shared free time amongst all room members via Google Calendar FreeBusy API
   - Overlap visualization with FullCalendar (Week/Day)
 - AI scheduling
-  - OpenAI suggests an activity and description
-  - Creates a calendar event for all members (calendar.events scope), invites attendees, and sends updates
-  - Optionally picks a venue near the group’s centroid via Google Places and includes the map link
+  - OpenAI suggests an activity and description based on the centroid location of all members
+  - Automatically creates a calendar event for all members, invites attendees, and includes the activity link / location via Google Places
 - Profiles
-  - Each user can save a short bio; AI uses group bios to tailor activities
-- Location
-  - Users can share approximate location; the scheduler computes the centroid for a convenient venue
+  - Each user can save a short bio (i.e I love puzzles and physical activities like running)
+  - AI uses group bios to tailor activities
 
 ---
 
 ## Tech stack
-- Next.js 15 (App: `/pages`)
+- Next.js 15
 - TypeScript, React 19
 - NextAuth (Google provider)
 - Supabase (Postgres + RLS)
@@ -31,52 +32,7 @@ A collaborative scheduling app: create a room, invite friends, see everyone’s 
 
 ---
 
-## Prerequisites
-- Node 18+ and npm
-- Supabase project (or Postgres equivalent)
-- Google Cloud project with:
-  - OAuth client (Web)
-  - Enabled APIs: Calendar API, Places API
-  - Billing enabled for Places
-- OpenAI API key
-
----
-
-## Environment variables
-
-Create `.env.local` for local dev and add these to your deployment (e.g., Vercel → Project → Settings → Environment Variables).
-
-```bash
-# App
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your_random_string
-
-# NextAuth Google OAuth
-GOOGLE_CLIENT_ID=...
-GOOGLE_CLIENT_SECRET=...
-
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-# Server-side service role is recommended for server API writes that bypass RLS:
-SUPABASE_SERVICE_ROLE=...
-
-# OpenAI
-OPENAI_API_KEY=...
-
-# Google Places
-GOOGLE_MAPS_API_KEY=...
-```
-
-Scopes: The Google provider is configured with:
-- https://www.googleapis.com/auth/calendar.readonly
-- https://www.googleapis.com/auth/calendar.events
-
-After adding events scope, users must re-consent (sign out/in).
-
----
-
-## Database schema (Supabase/Postgres)
+## Database Architecture (Supabase/Postgres)
 
 Rooms:
 ```sql
@@ -160,81 +116,6 @@ create policy "update own location" on public.user_location
 
 ---
 
-## Setup
-
-Install:
-```bash
-npm install
-```
-
-Dev:
-```bash
-npm run dev
-```
-
-Build:
-```bash
-npm run build
-npm start
-```
-
----
-
-## Google setup
-
-1) OAuth client (Web)
-- Authorized JavaScript origins: http://localhost:3000 (and your prod domain)
-- Authorized redirect URI: https://your-domain.com/api/auth/callback/google (and localhost)
-
-2) Enable APIs: Calendar API, Places API (requires billing)
-
-3) Re-consent
-- After adding `calendar.events`, users must sign out/in to re-consent.
-
----
-
-## How it works
-
-- Join a room:
-  - Visiting `/rooms/[code]` validates the room, upserts you into members, and fetches:
-    - Members list
-    - Common free windows (next 7 days) via Google Calendar FreeBusy
-- Calendar:
-  - FullCalendar renders only “Common free” background blocks (clean overlap view)
-- AI schedule:
-  - Button “Auto-schedule with AI” picks the earliest common free window
-  - Sends members’ bios and window to OpenAI for a tailored suggestion
-  - Creates an event on each member’s primary calendar (attendees + email updates)
-  - If member locations exist, finds a venue near the centroid via Places and includes a Google Maps link
-- Profiles:
-  - `/profile` lets users view/edit a description; AI uses it to tailor activities
-- Location:
-  - Users can save approximate location (consent required); scheduler uses it to pick venues
-
----
-
-## API (selected)
-
-- GET `/api/rooms` – rooms created by or joined by the current user
-- POST `/api/rooms` – create a room
-- GET `/api/rooms/[code]` – get room by code (Supabase)
-- GET/POST `/api/rooms/[code]/members` – list and join room members
-- GET `/api/rooms/[code]/availability` – common free times (next 7 days)
-- POST `/api/rooms/[code]/schedule` – AI suggest + create events (+ optional venue)
-- GET/POST `/api/user/profile` – load/save profile bio
-- GET/POST `/api/user/location` – load/save lat/lon
-
-Auth: All room APIs require authenticated sessions.
-
----
-
-## Security notes
-- Keep `SUPABASE_SERVICE_ROLE` server-only; never expose it to the browser.
-- RLS is enabled on user-owned tables; we only allow owners to read/write their own rows.
-- Google refresh tokens may be revoked; the app refreshes access tokens when expired, otherwise prompts re-consent.
-
----
-
 ## Roadmap
 - Date-range picker to fetch availability by visible range
 - Category filters and rating/open-now constraints for venue search
@@ -243,5 +124,9 @@ Auth: All room APIs require authenticated sessions.
 
 ---
 
-## License
-MIT
+## Next Steps
+- Performance optimizations (reducing latency of AI scheduling)
+- Integrate payments via stripe
+- Improve UI/UX
+- Create demo vid
+- Create ios app
