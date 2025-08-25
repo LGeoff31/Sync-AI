@@ -82,6 +82,7 @@ export default function Sidebar() {
         </div>
         <div className="space-y-1">
           <NavItem href="/rooms" label="Rooms" />
+          <NavItem href="/pricing" label="Pricing" />
           <NavItem href="/profile" label="Profile" />
         </div>
       </nav>

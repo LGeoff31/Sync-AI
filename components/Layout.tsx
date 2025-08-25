@@ -8,7 +8,8 @@ export default function Layout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const showSidebar =
     router.pathname.startsWith("/rooms") ||
-    router.pathname.startsWith("/profile");
+    router.pathname.startsWith("/profile") ||
+    router.pathname.startsWith("/pricing");
   return (
     <div className="flex flex-col">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(60rem_60rem_at_top_right,rgba(99,102,241,0.15),transparent_60%),radial-gradient(40rem_40rem_at_-10%_120%,rgba(168,85,247,0.12),transparent_60%)]" />
