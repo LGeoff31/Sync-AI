@@ -14,7 +14,15 @@ export type RoomCalendarData = {
 
 export default function RoomCalendar({ data }: { data?: RoomCalendarData }) {
   const events = useMemo(() => {
-    if (!data) return [] as any[];
+    if (!data)
+      return [] as {
+        title: string;
+        start: string;
+        end: string;
+        display: string;
+        backgroundColor: string;
+        borderColor: string;
+      }[];
     return (data.commonFree || []).map((f) => ({
       title: "Common free",
       start: f.start,
