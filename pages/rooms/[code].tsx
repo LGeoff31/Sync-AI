@@ -80,15 +80,23 @@ export default function RoomPage() {
         members: Array.isArray(dataM?.members)
           ? dataM.members
           : s.members || [],
-        free: Array.isArray((availPayload as any)?.free)
-          ? (availPayload as any).free
+        free: Array.isArray(
+          (availPayload as { free?: { start: string; end: string }[] })?.free
+        )
+          ? ((availPayload as { free?: { start: string; end: string }[] })
+              .free as { start: string; end: string }[])
           : s.free || [],
         calendar: {
           members: [],
-          commonFree: Array.isArray((availPayload as any)?.free)
-            ? (availPayload as any).free
+          commonFree: Array.isArray(
+            (availPayload as { free?: { start: string; end: string }[] })?.free
+          )
+            ? ((availPayload as { free?: { start: string; end: string }[] })
+                .free as { start: string; end: string }[])
             : [],
-          range: (availPayload as any)?.range,
+          range: (
+            availPayload as { range?: { timeMin: string; timeMax: string } }
+          )?.range,
         },
       }));
     };

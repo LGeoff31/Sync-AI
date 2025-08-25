@@ -13,7 +13,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         .eq("code", String(code).toUpperCase())
         .single();
       if (error) {
-        if ((error as any)?.code === "PGRST116") {
+        const pgErr = error as { code?: string; message: string };
+        if (pgErr?.code === "PGRST116") {
           return res.status(404).json({ error: "Room not found" });
         }
         return res.status(500).json({ error: error.message });
