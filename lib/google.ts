@@ -85,7 +85,6 @@ export async function fetchPrimaryBusy(
   timeMin: string,
   timeMax: string
 ): Promise<TimeInterval[]> {
-  console.log("REACHEDDDDD GEOFFREY");
   const resp = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
     method: "POST",
     headers: {
@@ -98,12 +97,10 @@ export async function fetchPrimaryBusy(
       items: [{ id: "primary" }],
     }),
   });
-  console.log("NEGROOO", resp);
   if (!resp.ok) return [];
   const data = (await resp.json()) as {
     calendars?: Record<string, { busy?: { start: string; end: string }[] }>;
   };
-  console.log("data GEOFFREY", data);
   const calendars = data.calendars || {};
   const primary = calendars["primary"] || { busy: [] };
   return (primary.busy || []).map((b) => ({ start: b.start, end: b.end }));

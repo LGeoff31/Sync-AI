@@ -64,7 +64,6 @@ export default function RoomPage() {
       ]);
       const dataM = await resM.json().catch(() => ({ members: [] }));
       const roomPayload = await resRoom.json().catch(() => ({}));
-      console.log("resRoom", resRoom);
       const roomName =
         resRoom.ok && roomPayload?.room?.name
           ? roomPayload.room.name
@@ -165,12 +164,46 @@ export default function RoomPage() {
                       body: JSON.stringify({ window: best }),
                     });
                     const data = await res.json();
-                    if (res.ok) alert(`Scheduled: ${data.title}`);
+                    if (res.ok)
+                      alert(
+                        `Scheduled: ${data.title}${
+                          data.placeUrl ? `\n${data.placeUrl}` : ""
+                        }`
+                      );
                     else alert(data.error || "Failed to schedule");
                   }}
                   className="w-full rounded-md bg-emerald-500 px-4 py-2 font-medium text-slate-900 hover:bg-emerald-400 transition"
                 >
                   Auto-schedule with AI
+                </button>
+              </div>
+
+              <div className="mt-3">
+                <button
+                  onClick={() => {
+                    if (!("geolocation" in navigator))
+                      return alert("Geolocation not supported");
+                    navigator.geolocation.getCurrentPosition(
+                      async (pos) => {
+                        const { latitude, longitude } = pos.coords;
+                        const r = await fetch(`/api/user/location`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            lat: latitude,
+                            lon: longitude,
+                          }),
+                        });
+                        if (r.ok) alert("Location saved");
+                        else alert("Failed to save location");
+                      },
+                      (err) => alert("Location error: " + err.message),
+                      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+                    );
+                  }}
+                  className="w-full rounded-md bg-indigo-500 px-4 py-2 font-medium text-slate-900 hover:bg-indigo-400 transition"
+                >
+                  Share my location
                 </button>
               </div>
             </aside>
