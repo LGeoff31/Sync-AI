@@ -32,7 +32,11 @@ Simply create a room, invite your friends, see everyone’s overlapping free tim
 
 ---
 
-## Database Architecture (Supabase/Postgres)
+## Architecture
+
+---
+
+## Database Architecture
 
 Rooms:
 ```sql
