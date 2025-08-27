@@ -87,9 +87,8 @@ export default function RoomCalendar({
           select={(info) => {
             onSelectWindow?.({ start: info.startStr, end: info.endStr });
           }}
-          unselectAuto={true}
+          unselectAuto={false}
           unselect={() => onSelectWindow?.(null)}
-          dateClick={() => onSelectWindow?.(null)}
           eventClick={(info) => {
             if (info.event.display === "background") {
               const start =

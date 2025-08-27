@@ -46,6 +46,7 @@ export default function RoomPage() {
     start: string;
     end: string;
   } | null>(null);
+  const [isScheduling, setIsScheduling] = useState(false);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -222,31 +223,65 @@ export default function RoomPage() {
 
               <div className="mt-6">
                 <button
-                  disabled={!selectedWindow}
+                  disabled={!selectedWindow || isScheduling}
                   onClick={async () => {
                     if (!selectedWindow) return;
-                    const best = selectedWindow;
-                    const res = await fetch(`/api/rooms/${code}/schedule`, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ window: best }),
-                    });
-                    const data = await res.json();
-                    if (res.ok)
-                      alert(
-                        `Scheduled: ${data.title}${
-                          data.placeUrl ? `\n${data.placeUrl}` : ""
-                        }`
-                      );
-                    else alert(data.error || "Failed to schedule");
+                    setIsScheduling(true);
+                    try {
+                      const best = selectedWindow;
+                      const res = await fetch(`/api/rooms/${code}/schedule`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ window: best }),
+                      });
+                      const data = await res.json().catch(() => ({}));
+                      if (res.ok)
+                        alert(
+                          `Scheduled: ${data.title}${
+                            data.placeUrl ? `\n${data.placeUrl}` : ""
+                          }`
+                        );
+                      else alert(data.error || "Failed to schedule");
+                    } catch (e) {
+                      alert("Network error. Please try again.");
+                    } finally {
+                      setIsScheduling(false);
+                    }
                   }}
                   className={`w-full rounded-md px-4 py-2 font-medium transition ${
-                    selectedWindow
+                    selectedWindow && !isScheduling
                       ? "bg-emerald-500 text-slate-900 hover:bg-emerald-400"
                       : "bg-slate-700 text-slate-400 cursor-not-allowed"
                   }`}
+                  aria-busy={isScheduling}
                 >
-                  Pick activity & schedule
+                  {isScheduling ? (
+                    <span className="inline-flex items-center gap-2">
+                      <svg
+                        className="h-4 w-4 animate-spin"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        />
+                      </svg>
+                      Scheduling…
+                    </span>
+                  ) : (
+                    "Pick activity & schedule"
+                  )}
                 </button>
                 {!selectedWindow && (
                   <p className="mt-2 text-xs text-white/60">
