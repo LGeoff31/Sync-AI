@@ -91,6 +91,11 @@ export default function ProfilePage() {
     })();
   }, [status]);
 
+  const preview = useMemo(() => {
+    const prefs: Prefs = { price, distanceKm, foods, activities, notes };
+    return composeBio(prefs);
+  }, [price, distanceKm, foods, activities, notes]);
+
   if (status === "loading") return <div className="p-6">Loading profile…</div>;
   if (status !== "authenticated")
     return (
@@ -105,11 +110,6 @@ export default function ProfilePage() {
         </button>
       </div>
     );
-
-  const preview = useMemo(() => {
-    const prefs: Prefs = { price, distanceKm, foods, activities, notes };
-    return composeBio(prefs);
-  }, [price, distanceKm, foods, activities, notes]);
 
   function toggle(
     list: string[],

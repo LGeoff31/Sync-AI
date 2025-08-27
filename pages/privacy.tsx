@@ -21,8 +21,9 @@ export default function PrivacyPolicy() {
 
       <section className="mt-8 space-y-6 text-white/80 leading-relaxed">
         <p>
-          This page describes how SyncAI ("we", "us", "our") collects, uses, and
-          protects your information when you use our service.
+          This page describes how SyncAI (&quot;we&quot;, &quot;us&quot;,
+          &quot;our&quot;) collects, uses, and protects your information when
+          you use our service.
         </p>
 
         <div>
@@ -117,8 +118,8 @@ export default function PrivacyPolicy() {
           <h2 className="text-xl font-semibold text-white">Changes</h2>
           <p className="mt-2">
             We may update this policy from time to time. We will update the
-            "Last updated" date above and, when appropriate, notify you in the
-            app.
+            &quot;Last updated&quot; date above and, when appropriate, notify
+            you in the app.
           </p>
         </div>
 
