@@ -12,7 +12,13 @@ export type RoomCalendarData = {
   range?: { timeMin: string; timeMax: string };
 };
 
-export default function RoomCalendar({ data }: { data?: RoomCalendarData }) {
+export default function RoomCalendar({
+  data,
+  onSelectWindow,
+}: {
+  data?: RoomCalendarData;
+  onSelectWindow?: (w: { start: string; end: string } | null) => void;
+}) {
   const events = useMemo(() => {
     if (!data)
       return [] as {
@@ -66,6 +72,39 @@ export default function RoomCalendar({ data }: { data?: RoomCalendarData }) {
           allDaySlot={false}
           slotDuration="0:30:00"
           height={600}
+          selectable={true}
+          selectMirror={true}
+          selectOverlap={() => true}
+          selectAllow={(selection) => {
+            const startTs = selection.start.getTime();
+            const endTs = selection.end.getTime();
+            return (data?.commonFree || []).some((f) => {
+              const fs = Date.parse(f.start);
+              const fe = Date.parse(f.end);
+              return startTs >= fs && endTs <= fe;
+            });
+          }}
+          select={(info) => {
+            onSelectWindow?.({ start: info.startStr, end: info.endStr });
+          }}
+          unselectAuto={true}
+          unselect={() => onSelectWindow?.(null)}
+          dateClick={() => onSelectWindow?.(null)}
+          eventClick={(info) => {
+            if (info.event.display === "background") {
+              const start =
+                info.event.startStr || info.event.start?.toISOString();
+              const end = info.event.endStr || info.event.end?.toISOString();
+              if (start && end) onSelectWindow?.({ start, end });
+            }
+          }}
+          eventDidMount={(arg) => {
+            if (arg.event.display === "background") {
+              arg.el.classList.add("cursor-pointer");
+              (arg.el as HTMLElement).title =
+                "Click to select this free window";
+            }
+          }}
         />
       </div>
     </div>

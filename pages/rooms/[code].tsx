@@ -42,8 +42,11 @@ export default function RoomPage() {
     free?: { start: string; end: string }[];
     calendar?: RoomCalendarData;
   }>({ loading: true });
+  const [selectedWindow, setSelectedWindow] = useState<{
+    start: string;
+    end: string;
+  } | null>(null);
 
-  // Auto-prompt for location (better UX than a manual button)
   useEffect(() => {
     if (status !== "authenticated") return;
     const STORAGE_KEY = "__LAST_GEO_UPLOAD__";
@@ -62,10 +65,18 @@ export default function RoomPage() {
     // If Permissions API exists and is explicitly denied, skip prompting
     const checkAndRequest = async () => {
       try {
-        const perms = (navigator as any).permissions;
+        const perms = (
+          navigator as Navigator & {
+            permissions?: {
+              query: (desc: { name: "geolocation" }) => Promise<{
+                state?: PermissionState;
+              }>;
+            };
+          }
+        ).permissions;
         if (perms?.query) {
           const result = await perms.query({ name: "geolocation" });
-          if (result?.state === "denied") return; // user blocked
+          if (result?.state === "denied") return;
         }
       } catch {}
 
@@ -168,7 +179,10 @@ export default function RoomPage() {
         {state.error && <p className="text-red-400">{state.error}</p>}
         {!state.loading && !state.error && (
           <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-            <RoomCalendar data={state.calendar} />
+            <RoomCalendar
+              data={state.calendar}
+              onSelectWindow={setSelectedWindow}
+            />
 
             <aside className="rounded-xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur h-max">
               <div className="flex items-center gap-3 justify-between">
@@ -179,7 +193,6 @@ export default function RoomPage() {
                   {code}
                 </code>
               </div>
-
               <p className="mt-1 text-sm text-white/70">
                 Share this link with friends to join:
               </p>
@@ -209,10 +222,10 @@ export default function RoomPage() {
 
               <div className="mt-6">
                 <button
+                  disabled={!selectedWindow}
                   onClick={async () => {
-                    if (!state.free || state.free.length === 0)
-                      return alert("No free window available");
-                    const best = state.free[0];
+                    if (!selectedWindow) return;
+                    const best = selectedWindow;
                     const res = await fetch(`/api/rooms/${code}/schedule`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
@@ -227,10 +240,20 @@ export default function RoomPage() {
                       );
                     else alert(data.error || "Failed to schedule");
                   }}
-                  className="w-full rounded-md bg-emerald-500 px-4 py-2 font-medium text-slate-900 hover:bg-emerald-400 transition"
+                  className={`w-full rounded-md px-4 py-2 font-medium transition ${
+                    selectedWindow
+                      ? "bg-emerald-500 text-slate-900 hover:bg-emerald-400"
+                      : "bg-slate-700 text-slate-400 cursor-not-allowed"
+                  }`}
                 >
-                  Auto-schedule with AI
+                  Pick activity & schedule
                 </button>
+                {!selectedWindow && (
+                  <p className="mt-2 text-xs text-white/60">
+                    Hover or click a highlighted green window on the calendar to
+                    select it.
+                  </p>
+                )}
               </div>
             </aside>
           </div>
