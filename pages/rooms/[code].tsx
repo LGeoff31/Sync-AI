@@ -43,6 +43,60 @@ export default function RoomPage() {
     calendar?: RoomCalendarData;
   }>({ loading: true });
 
+  // Auto-prompt for location (better UX than a manual button)
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    const STORAGE_KEY = "__LAST_GEO_UPLOAD__";
+    try {
+      const last =
+        typeof window !== "undefined"
+          ? Number(window.localStorage.getItem(STORAGE_KEY) || "0")
+          : 0;
+      // Only attempt at most every 6 hours
+      if (last && Date.now() - last < 6 * 60 * 60 * 1000) return;
+    } catch {}
+
+    if (typeof navigator === "undefined" || !("geolocation" in navigator))
+      return;
+
+    // If Permissions API exists and is explicitly denied, skip prompting
+    const checkAndRequest = async () => {
+      try {
+        const perms = (navigator as any).permissions;
+        if (perms?.query) {
+          const result = await perms.query({ name: "geolocation" });
+          if (result?.state === "denied") return; // user blocked
+        }
+      } catch {}
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const r = await fetch(`/api/user/location`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                lat: pos.coords.latitude,
+                lon: pos.coords.longitude,
+              }),
+            });
+            if (r.ok) {
+              try {
+                if (typeof window !== "undefined") {
+                  window.localStorage.setItem(STORAGE_KEY, String(Date.now()));
+                }
+              } catch {}
+            }
+          } catch {}
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+      );
+    };
+
+    checkAndRequest();
+  }, [status]);
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.replace("/");
@@ -125,6 +179,7 @@ export default function RoomPage() {
                   {code}
                 </code>
               </div>
+
               <p className="mt-1 text-sm text-white/70">
                 Share this link with friends to join:
               </p>
@@ -175,35 +230,6 @@ export default function RoomPage() {
                   className="w-full rounded-md bg-emerald-500 px-4 py-2 font-medium text-slate-900 hover:bg-emerald-400 transition"
                 >
                   Auto-schedule with AI
-                </button>
-              </div>
-
-              <div className="mt-3">
-                <button
-                  onClick={() => {
-                    if (!("geolocation" in navigator))
-                      return alert("Geolocation not supported");
-                    navigator.geolocation.getCurrentPosition(
-                      async (pos) => {
-                        const { latitude, longitude } = pos.coords;
-                        const r = await fetch(`/api/user/location`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            lat: latitude,
-                            lon: longitude,
-                          }),
-                        });
-                        if (r.ok) alert("Location saved");
-                        else alert("Failed to save location");
-                      },
-                      (err) => alert("Location error: " + err.message),
-                      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-                    );
-                  }}
-                  className="w-full rounded-md bg-indigo-500 px-4 py-2 font-medium text-slate-900 hover:bg-indigo-400 transition"
-                >
-                  Share my location
                 </button>
               </div>
             </aside>
