@@ -33,12 +33,12 @@ export default function Home() {
               →
             </span>
           </button>
-          <a
+          <Link
             href="/demo"
             className="inline-flex h-12 items-center justify-center rounded-full border border-white/20 bg-white/5 px-6 font-semibold text-white/90 backdrop-blur transition-colors hover:bg-white/10"
           >
             See how it works
-          </a>
+          </Link>
         </div>
       </section>
 
