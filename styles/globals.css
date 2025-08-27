@@ -14,6 +14,35 @@ body {
   color: white;
 }
 
+/* Lightweight animations */
+.animate-fade-up {
+  animation: fadeUp 700ms ease forwards;
+  opacity: 0;
+}
+.animate-gradient-slow {
+  animation: gradientShift 12s ease-in-out infinite alternate;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes gradientShift {
+  from {
+    transform: translateY(0);
+    filter: hue-rotate(0deg);
+  }
+  to {
+    transform: translateY(-2%);
+    filter: hue-rotate(15deg);
+  }
+}
+
 .rbc-calendar,
 .rbc-time-view,
 .rbc-time-content,
