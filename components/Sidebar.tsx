@@ -71,10 +71,15 @@ export default function Sidebar() {
   };
   return (
     <div
-      className="hidden md:flex md:flex-col md:border-r md:border-white/10 md:bg-white/5 h-screen relative"
+      className="hidden md:flex md:flex-col md:border-r md:border-white/10 md:bg-white/5 h-screen md:sticky md:top-0 md:self-start relative overflow-y-auto"
       style={{ width: sidebarWidth }}
     >
-      <div className="px-4 py-8 border-b border-white/10"></div>
+      <div className="px-3 py-3 border-b border-white/10 sticky top-0 z-20 bg-white/5 backdrop-blur">
+        <div className="flex items-center gap-2">
+          <img src="/logo.svg" alt="syncAI" className="h-7 w-7" />
+          <span className="text-white text-lg font-semibold">SyncAI</span>
+        </div>
+      </div>
 
       <nav className="flex-1 px-3 py-4">
         <div className="px-2 pb-1 text-xs font-medium uppercase tracking-wide text-white/50">
@@ -85,6 +90,7 @@ export default function Sidebar() {
           <NavItem href="/demo" label="Demo" />
           <NavItem href="/pricing" label="Pricing" />
           <NavItem href="/profile" label="Profile" />
+          <NavItem href="/privacy" label="Privacy" />
         </div>
       </nav>
 
