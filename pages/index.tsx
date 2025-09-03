@@ -17,7 +17,7 @@ export default function Home() {
         </h1>
         <p className="max-w-2xl text-lg text-white/70 md:text-xl animate-fade-up [animation-delay:200ms]">
           SyncAI finds common availability, suggests nearby venues, and creates
-          Google Calendar events—so your group can decide in one click.
+          Google Calendar events so your group can have fun with one click.
         </p>
         <div className="flex flex-col items-center gap-3 sm:flex-row animate-fade-up [animation-delay:300ms]">
           <button

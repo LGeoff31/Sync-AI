@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { signOut, useSession, signIn } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import type React from "react";
+import { FiLogIn, FiLogOut } from "react-icons/fi";
 
 function NavItem({ href, label }: { href: string; label: string }) {
   const router = useRouter();
@@ -98,9 +99,10 @@ export default function Sidebar() {
         <div className="px-4 py-8 border-b border-white/10">
           <button
             onClick={() => signIn("google")}
-            className="mt-3 w-full rounded-md bg-indigo-500 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-indigo-400 transition"
+            className="mt-3 w-full rounded-md bg-indigo-500 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-indigo-400 transition inline-flex items-center justify-center gap-2"
           >
-            Sign in
+            <FiLogIn className="h-4 w-4" />
+            <span>Sign in</span>
           </button>
         </div>
       )}
@@ -134,9 +136,10 @@ export default function Sidebar() {
               <div className="absolute right-0 bottom-full mb-2 z-20 w-36 rounded-md border border-white/10 bg-slate-900/90 p-1 shadow-lg backdrop-blur">
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="w-full rounded px-2 py-1.5 text-left text-sm text-white/90 hover:bg-white/10"
+                  className="w-full rounded px-2 py-1.5 text-left text-sm text-white/90 hover:bg-white/10 inline-flex items-center gap-2"
                 >
-                  Sign out
+                  <FiLogOut className="h-4 w-4" />
+                  <span>Sign out</span>
                 </button>
               </div>
             </details>

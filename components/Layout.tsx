@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ReactNode } from "react";
+import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import Sidebar from "@/components/Sidebar";
@@ -34,16 +35,18 @@ export default function Layout({ children }: { children: ReactNode }) {
           status === "authenticated" ? (
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 backdrop-blur transition hover:bg-white/20 cursor-pointer"
+              className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 backdrop-blur transition hover:bg-white/20 cursor-pointer inline-flex items-center gap-2"
             >
-              Sign out
+              <FiLogOut className="h-4 w-4" />
+              <span>Sign out</span>
             </button>
           ) : (
             <button
               onClick={() => signIn("google", { callbackUrl: "/" })}
-              className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 backdrop-blur transition hover:bg-white/20 cursor-pointer"
+              className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 backdrop-blur transition hover:bg-white/20 cursor-pointer inline-flex items-center gap-2"
             >
-              Sign in
+              <FiLogIn className="h-4 w-4" />
+              <span>Sign in</span>
             </button>
           )
         ) : null}

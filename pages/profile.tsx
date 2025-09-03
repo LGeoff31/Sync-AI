@@ -1,5 +1,6 @@
 import { useSession, signIn } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
+import { FiLogIn } from "react-icons/fi";
 
 export default function ProfilePage() {
   const { status, data } = useSession();
@@ -104,9 +105,10 @@ export default function ProfilePage() {
         <p className="text-white/70">Sign in to view your profile.</p>
         <button
           onClick={() => signIn("google")}
-          className="mt-4 rounded-md bg-indigo-500 px-4 py-2 font-medium text-slate-900 hover:bg-indigo-400 transition"
+          className="mt-4 rounded-md bg-indigo-500 px-4 py-2 font-medium text-slate-900 hover:bg-indigo-400 transition inline-flex items-center gap-2"
         >
-          Sign in with Google
+          <FiLogIn className="h-4 w-4" />
+          <span>Sign in with Google</span>
         </button>
       </div>
     );
