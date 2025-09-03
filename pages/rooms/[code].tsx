@@ -12,7 +12,7 @@ function InviteLink({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <div className="flex items-center gap-3">
-      <code className="block rounded bg-slate-900/60 px-3 py-2 text-white ring-1 ring-white/10 break-all">
+      <code className="flex-1 rounded-lg bg-slate-800/50 px-4 py-3 text-sm text-white ring-1 ring-white/10 break-all">
         {url}
       </code>
       <button
@@ -21,7 +21,7 @@ function InviteLink({ code }: { code: string }) {
           setCopied(true);
           setTimeout(() => setCopied(false), 1200);
         }}
-        className="rounded-md bg-indigo-500 px-3 py-2 font-medium text-slate-900 hover:bg-indigo-400 transition cursor-pointer"
+        className="rounded-lg bg-indigo-600 px-4 py-3 font-medium text-white hover:bg-indigo-500 transition"
         aria-label={copied ? "Copied" : "Copy to clipboard"}
         title={copied ? "Copied" : "Copy to clipboard"}
       >
@@ -179,6 +179,7 @@ export default function RoomPage() {
         },
       }));
 
+      // Map locations with member names
       const emailToName = new Map<string, string | undefined>(
         (Array.isArray(dataM?.members) ? dataM.members : []).map(
           (m: { user_email: string; user_name: string }) => [
@@ -205,42 +206,151 @@ export default function RoomPage() {
   if (status !== "authenticated") return null;
 
   return (
-    <div className="px-6 py-12">
-      <div className="mx-auto max-w-6xl">
-        {state.loading && <p className="text-white/80">Loading...</p>}
-        {state.error && <p className="text-red-400">{state.error}</p>}
-        {!state.loading && !state.error && (
-          <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-            <RoomCalendar
-              data={state.calendar}
-              onSelectWindow={setSelectedWindow}
-            />
+    <div className="mx-auto max-w-7xl px-6 py-8">
+      {state.loading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-white/80">Loading room...</div>
+        </div>
+      )}
 
-            <aside className="rounded-xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur h-max">
-              <div className="flex items-center gap-3 justify-between">
-                <h1 className="text-2xl font-semibold">
+      {state.error && (
+        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4">
+          <p className="text-red-400">{state.error}</p>
+        </div>
+      )}
+
+      {!state.loading && !state.error && (
+        <div className="space-y-8">
+          {/* Room header */}
+          <div className="border-b border-white/10 pb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-white">
                   {state.name || "Untitled room"}
                 </h1>
-                <code className="rounded bg-slate-900/60 px-2 py-1 text-sm text-white/70 ring-1 ring-white/10">
-                  {code}
-                </code>
+                <div className="mt-2 flex items-center gap-4">
+                  <code className="rounded-lg bg-slate-800/50 px-3 py-1 text-sm text-white/70 ring-1 ring-white/10">
+                    {code}
+                  </code>
+                  <span className="text-sm text-white/60">
+                    {state.members?.length || 0} members
+                  </span>
+                  <span className="text-sm text-white/60">
+                    {locations.length} shared locations
+                  </span>
+                </div>
               </div>
-              <p className="mt-1 text-sm text-white/70">
-                Share this link with friends to join:
-              </p>
-              <div className="mt-4">
-                <InviteLink code={String(code)} />
-              </div>
+            </div>
 
-              <div className="mt-6">
-                <h2 className="text-lg font-medium">Locations</h2>
-                <p className="mt-1 text-sm text-white/70">
+            {/* Invite section */}
+            <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
+              <h3 className="text-sm font-medium text-white/90 mb-3">
+                Share room with friends
+              </h3>
+              <InviteLink code={String(code)} />
+            </div>
+          </div>
+
+          {/* Main content grid */}
+          <div className="grid gap-8 lg:grid-cols-3">
+            {/* Calendar - takes up 2 columns */}
+            <div className="lg:col-span-2">
+              <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                <h2 className="text-xl font-semibold text-white mb-4">
+                  Schedule
+                </h2>
+                <RoomCalendar
+                  data={state.calendar}
+                  onSelectWindow={setSelectedWindow}
+                />
+
+                {/* Schedule button */}
+                <div className="mt-6 pt-6 border-t border-white/10">
+                  <button
+                    disabled={!selectedWindow || isScheduling}
+                    onClick={async () => {
+                      if (!selectedWindow) return;
+                      setIsScheduling(true);
+                      try {
+                        const best = selectedWindow;
+                        const res = await fetch(`/api/rooms/${code}/schedule`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ window: best }),
+                        });
+                        const data = await res.json().catch(() => ({}));
+                        if (res.ok)
+                          alert(
+                            `Scheduled: ${data.title}${
+                              data.placeUrl ? `\n${data.placeUrl}` : ""
+                            }`
+                          );
+                        else alert(data.error || "Failed to schedule");
+                      } catch (e) {
+                        alert("Network error. Please try again.");
+                      } finally {
+                        setIsScheduling(false);
+                      }
+                    }}
+                    className={`w-full rounded-lg px-6 py-3 font-medium transition ${
+                      selectedWindow && !isScheduling
+                        ? "bg-indigo-600 text-white hover:bg-indigo-500"
+                        : "bg-slate-700 text-slate-400 cursor-not-allowed"
+                    }`}
+                    aria-busy={isScheduling}
+                  >
+                    {isScheduling ? (
+                      <span className="inline-flex items-center gap-2">
+                        <svg
+                          className="h-4 w-4 animate-spin"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                          />
+                        </svg>
+                        Scheduling activity...
+                      </span>
+                    ) : (
+                      "Schedule Selected Time"
+                    )}
+                  </button>
+                  {!selectedWindow && (
+                    <p className="mt-2 text-center text-sm text-white/60">
+                      Select a green time slot on the calendar to schedule an
+                      activity
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right sidebar content */}
+            <div className="space-y-6">
+              {/* Map */}
+              <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Locations
+                </h3>
+                <p className="text-sm text-white/60 mb-4">
                   {locations.length} / {state.members?.length || 0} members
                   shared location
                 </p>
-                <div className="mt-3 overflow-hidden rounded-lg border border-white/10">
+                <div className="overflow-hidden rounded-lg border border-white/10">
                   <RoomMap
-                    height={200}
+                    height={250}
                     markers={locations.map((l) => ({
                       lat: l.lat,
                       lon: l.lon,
@@ -250,100 +360,42 @@ export default function RoomPage() {
                 </div>
               </div>
 
-              <div className="mt-6">
-                <h2 className="text-lg font-medium">Members</h2>
+              {/* Members */}
+              <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                <h3 className="text-lg font-semibold text-white mb-4">
+                  Members
+                </h3>
                 {state.members && state.members.length > 0 ? (
-                  <ul className="mt-3 divide-y divide-white/10 rounded-lg border border-white/10 bg-white/5">
+                  <div className="space-y-3">
                     {state.members.map((m) => (
-                      <li
+                      <div
                         key={m.user_email}
-                        className="flex items-center justify-between px-4 py-2"
+                        className="flex items-center gap-3 rounded-lg bg-white/5 p-3"
                       >
-                        <div className="font-medium">{m.user_name}</div>
-                        <div className="text-xs text-white/60">
-                          {m.user_email}
+                        <div className="h-8 w-8 rounded-full bg-indigo-600/20 flex items-center justify-center">
+                          <span className="text-sm font-medium text-indigo-400">
+                            {m.user_name.charAt(0).toUpperCase()}
+                          </span>
                         </div>
-                      </li>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-white truncate">
+                            {m.user_name}
+                          </div>
+                          <div className="text-xs text-white/60 truncate">
+                            {m.user_email}
+                          </div>
+                        </div>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 ) : (
-                  <p className="mt-2 text-sm text-white/70">No members yet.</p>
+                  <p className="text-sm text-white/60">No members yet</p>
                 )}
               </div>
-
-              <div className="mt-6">
-                <button
-                  disabled={!selectedWindow || isScheduling}
-                  onClick={async () => {
-                    if (!selectedWindow) return;
-                    setIsScheduling(true);
-                    try {
-                      const best = selectedWindow;
-                      const res = await fetch(`/api/rooms/${code}/schedule`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ window: best }),
-                      });
-                      const data = await res.json().catch(() => ({}));
-                      if (res.ok)
-                        alert(
-                          `Scheduled: ${data.title}${
-                            data.placeUrl ? `\n${data.placeUrl}` : ""
-                          }`
-                        );
-                      else alert(data.error || "Failed to schedule");
-                    } catch (e) {
-                      alert("Network error. Please try again.");
-                    } finally {
-                      setIsScheduling(false);
-                    }
-                  }}
-                  className={`w-full rounded-md px-4 py-2 font-medium transition ${
-                    selectedWindow && !isScheduling
-                      ? "bg-emerald-500 text-slate-900 hover:bg-emerald-400"
-                      : "bg-slate-700 text-slate-400 cursor-not-allowed"
-                  }`}
-                  aria-busy={isScheduling}
-                >
-                  {isScheduling ? (
-                    <span className="inline-flex items-center gap-2">
-                      <svg
-                        className="h-4 w-4 animate-spin"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                        />
-                      </svg>
-                      Scheduling…
-                    </span>
-                  ) : (
-                    "Pick activity & schedule"
-                  )}
-                </button>
-                {!selectedWindow && (
-                  <p className="mt-2 text-xs text-white/60">
-                    Hover or click a highlighted green window on the calendar to
-                    select it.
-                  </p>
-                )}
-              </div>
-            </aside>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

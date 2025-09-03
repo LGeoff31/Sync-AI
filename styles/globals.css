@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #6366f1;
+  cursor: pointer;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  background: #4f46e5;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+  transform: scale(1.1);
+}
+
+.slider::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #6366f1;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  transition: all 0.2s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  background: #4f46e5;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+  transform: scale(1.1);
+}
+
 html,
 body,
 #__next {
