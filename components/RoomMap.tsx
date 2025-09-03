@@ -90,10 +90,18 @@ declare global {
   interface Window {
     google: {
       maps: {
-        Map: new (element: HTMLElement, options: object) => object;
-        Marker: new (options: object) => object;
-        InfoWindow: new (options: object) => object;
-        LatLngBounds: new () => object;
+        Map: new (element: HTMLElement, options: object) => {
+          fitBounds: (bounds: object) => void;
+        };
+        Marker: new (options: object) => {
+          addListener: (event: string, handler: () => void) => void;
+        };
+        InfoWindow: new (options: object) => {
+          open: (map: object, marker: object) => void;
+        };
+        LatLngBounds: new () => {
+          extend: (latLng: object) => void;
+        };
         LatLng: new (lat: number, lng: number) => object;
         SymbolPath: object;
         ZoomControlStyle: object;
