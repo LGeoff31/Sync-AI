@@ -4,6 +4,7 @@ import copy from "copy-to-clipboard";
 import { FaRegClipboard, FaClipboardCheck } from "react-icons/fa";
 import RoomCalendar, { type RoomCalendarData } from "@/components/RoomCalendar";
 import { useSession, signIn } from "next-auth/react";
+import RoomMap from "@/components/RoomMap";
 
 function InviteLink({ code }: { code: string }) {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -47,6 +48,9 @@ export default function RoomPage() {
     end: string;
   } | null>(null);
   const [isScheduling, setIsScheduling] = useState(false);
+  const [locations, setLocations] = useState<
+    { email: string; lat: number; lon: number; name?: string }[]
+  >([]);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -123,10 +127,11 @@ export default function RoomPage() {
         await fetch(`/api/rooms/${code}/members`, { method: "POST" });
       } catch {}
 
-      const [resM, resRoom, resAvail] = await Promise.all([
+      const [resM, resRoom, resAvail, resLoc] = await Promise.all([
         fetch(`/api/rooms/${code}/members`),
         fetch(`/api/rooms/${code}`),
         fetch(`/api/rooms/${code}/availability`),
+        fetch(`/api/rooms/${code}/locations`),
       ]);
       const dataM = await resM.json().catch(() => ({ members: [] }));
       const roomPayload = await resRoom.json().catch(() => ({}));
@@ -138,6 +143,15 @@ export default function RoomPage() {
       const availPayload = await resAvail
         .json()
         .catch(() => ({ free: [], range: undefined }));
+
+      const locPayload = await resLoc.json().catch(() => ({ locations: [] }));
+      const locs = Array.isArray(locPayload?.locations)
+        ? (locPayload.locations as {
+            user_email: string;
+            lat: number;
+            lon: number;
+          }[])
+        : [];
 
       setState((s) => ({
         loading: false,
@@ -164,6 +178,23 @@ export default function RoomPage() {
           )?.range,
         },
       }));
+
+      const emailToName = new Map<string, string | undefined>(
+        (Array.isArray(dataM?.members) ? dataM.members : []).map(
+          (m: { user_email: string; user_name: string }) => [
+            m.user_email,
+            m.user_name,
+          ]
+        )
+      );
+      const finalLocations = locs.map((l) => ({
+        email: l.user_email,
+        lat: l.lat,
+        lon: l.lon,
+        name: emailToName.get(l.user_email),
+      }));
+
+      setLocations(finalLocations);
     };
 
     fetchAll();
@@ -200,6 +231,25 @@ export default function RoomPage() {
               <div className="mt-4">
                 <InviteLink code={String(code)} />
               </div>
+
+              <div className="mt-6">
+                <h2 className="text-lg font-medium">Locations</h2>
+                <p className="mt-1 text-sm text-white/70">
+                  {locations.length} / {state.members?.length || 0} members
+                  shared location
+                </p>
+                <div className="mt-3 overflow-hidden rounded-lg border border-white/10">
+                  <RoomMap
+                    height={200}
+                    markers={locations.map((l) => ({
+                      lat: l.lat,
+                      lon: l.lon,
+                      label: l.name || l.email,
+                    }))}
+                  />
+                </div>
+              </div>
+
               <div className="mt-6">
                 <h2 className="text-lg font-medium">Members</h2>
                 {state.members && state.members.length > 0 ? (
