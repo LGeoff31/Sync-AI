@@ -19,7 +19,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const isAuthenticated = status === "authenticated";
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-slate-950 flex flex-col">
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(60rem_60rem_at_top_right,rgba(99,102,241,0.08),transparent_60%),radial-gradient(40rem_40rem_at_-10%_120%,rgba(168,85,247,0.06),transparent_60%)]" />
 
       <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl">
@@ -113,10 +113,8 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
       </nav>
 
-      {/* Main content */}
-      <main className="relative z-10">{children}</main>
+      <main className="relative z-10 flex-1">{children}</main>
 
-      {/* Clean footer */}
       <footer className="border-t border-white/10 bg-slate-950/50 py-8">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FiCalendar, FiMapPin, FiUsers } from "react-icons/fi";
+import DemoVideo from "@/components/DemoVideo";
 
 export default function Home() {
   return (
@@ -64,6 +65,25 @@ export default function Home() {
           desc="Creates Google Calendar events and updates attendees automatically."
           delay="160ms"
         />
+      </section>
+
+      <section className="relative z-10 mx-auto w-full max-w-5xl px-6 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-white mb-4 animate-fade-up">
+            See SyncAI in Action
+          </h2>
+          <p className="text-lg text-white/70 max-w-2xl mx-auto animate-fade-up [animation-delay:100ms]">
+            Watch how easy it is to coordinate schedules, find venues, and book
+            activities with a single click.
+          </p>
+        </div>
+
+        <div className="animate-fade-up [animation-delay:200ms]">
+          <DemoVideo
+            src="/demo.mov"
+            className="w-full aspect-video max-w-4xl mx-auto"
+          />
+        </div>
       </section>
     </div>
   );

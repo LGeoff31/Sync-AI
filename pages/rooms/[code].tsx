@@ -5,6 +5,8 @@ import { FaRegClipboard, FaClipboardCheck } from "react-icons/fa";
 import RoomCalendar, { type RoomCalendarData } from "@/components/RoomCalendar";
 import { useSession, signIn } from "next-auth/react";
 import RoomMap from "@/components/RoomMap";
+import Toast, { ToastProps } from "@/components/Toast";
+import { fireSuccessConfetti } from "@/lib/confetti";
 
 function InviteLink({ code }: { code: string }) {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -51,6 +53,7 @@ export default function RoomPage() {
   const [locations, setLocations] = useState<
     { email: string; lat: number; lon: number; name?: string }[]
   >([]);
+  const [toast, setToast] = useState<Omit<ToastProps, "onClose"> | null>(null);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -197,7 +200,6 @@ export default function RoomPage() {
 
       setLocations(finalLocations);
     };
-
     fetchAll();
   }, [code, status]);
 
@@ -279,15 +281,47 @@ export default function RoomPage() {
                           body: JSON.stringify({ window: best }),
                         });
                         const data = await res.json().catch(() => ({}));
-                        if (res.ok)
-                          alert(
-                            `Scheduled: ${data.title}${
-                              data.placeUrl ? `\n${data.placeUrl}` : ""
-                            }`
-                          );
-                        else alert(data.error || "Failed to schedule");
+                        if (res.ok) {
+                          setSelectedWindow(null);
+
+                          fireSuccessConfetti();
+
+                          setToast({
+                            isVisible: true,
+                            type: "success",
+                            title: "🎉 Activity Scheduled!",
+                            message: `Successfully scheduled: ${data.title}`,
+                            actionLabel: data.placeUrl
+                              ? "View Location"
+                              : undefined,
+                            actionUrl: data.placeUrl || undefined,
+                            duration: 6000,
+                          });
+
+                          // Refresh the data to show the new activity
+                          setTimeout(() => {
+                            window.location.reload();
+                          }, 2000);
+                        } else {
+                          setToast({
+                            isVisible: true,
+                            type: "error",
+                            title: "Scheduling Failed",
+                            message:
+                              data.error ||
+                              "Failed to schedule activity. Please try again.",
+                            duration: 5000,
+                          });
+                        }
                       } catch (e) {
-                        alert("Network error. Please try again.");
+                        setToast({
+                          isVisible: true,
+                          type: "error",
+                          title: "Network Error",
+                          message:
+                            "Please check your connection and try again.",
+                          duration: 5000,
+                        });
                       } finally {
                         setIsScheduling(false);
                       }
@@ -396,6 +430,8 @@ export default function RoomPage() {
           </div>
         </div>
       )}
+
+      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
     </div>
   );
 }
